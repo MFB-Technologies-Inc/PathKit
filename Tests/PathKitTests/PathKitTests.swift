@@ -17,7 +17,11 @@ import XCTest
 
 final class PathKitTests: XCTestCase {
     let fixtures = "/tmp/PathKitTests"
-    let fixturesResolved = "/private/tmp/PathKitTests"
+    #if os(Linux)
+        let fixturesResolved = "/tmp/PathKitTests"
+    #else
+        let fixturesResolved = "/private/tmp/PathKitTests"
+    #endif
 
     override func tearDown() async throws {
         if FileManager.default.fileExists(atPath: fixtures) {
