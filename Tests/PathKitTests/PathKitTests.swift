@@ -16,12 +16,22 @@ import Foundation
 import XCTest
 
 final class PathKitTests: XCTestCase {
-    let fixtures = "/tmp/PathKitTests"
-    #if os(Linux)
-        let fixturesResolved = "/tmp/PathKitTests"
-    #else
-        let fixturesResolved = "/private/tmp/PathKitTests"
-    #endif
+    let (fixtures, fixturesResolved) = {
+        let fixtures: String
+        let fixturesResolved: String
+        if let tempDirFromEnv = ProcessInfo.processInfo.environment["TEMP_DIR"] {
+            fixtures = "\(tempDirFromEnv)/PathKitTests"
+            fixturesResolved = "\(tempDirFromEnv)/PathKitTests"
+        } else {
+            fixtures = "/tmp/PathKitTests"
+            #if os(Linux)
+                fixturesResolved = "/tmp/PathKitTests"
+            #else
+                fixturesResolved = "/private/tmp/PathKitTests"
+            #endif
+        }
+        return (fixtures, fixturesResolved)
+    }()
 
     override func tearDown() async throws {
         if FileManager.default.fileExists(atPath: fixtures) {
