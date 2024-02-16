@@ -166,9 +166,8 @@ final class PathKitTests: XCTestCase {
             } else if NSUserName() == "root" {
                 XCTAssertEqual(path.absolute(), "/root")
             } else {
-                XCTAssertEqual(path.absolute(), "/Users/" + NSUserName())
+                XCTAssertEqual(path.absolute(), "/home/" + NSUserName())
             }
-            XCTAssertEqual(path.absolute(), Path.current + Path("swift"))
         #elseif os(macOS)
             XCTAssertEqual(path.absolute(), "/Users/" + NSUserName())
         #endif
