@@ -161,7 +161,9 @@ final class PathKitTests: XCTestCase {
     func testConvertRelativeToAbsoluteWithTilde() throws {
         let path = Path("~")
         #if os(Linux)
-            if NSUserName() == "root" {
+            if let envHome = ProcessInfo.processInfo.environment["HOME"] {
+                XCTAssertEqual(path.absolute().string, envHome)
+            } else if NSUserName() == "root" {
                 XCTAssertEqual(path.absolute(), "/root")
             } else {
                 XCTAssertEqual(path.absolute(), "/Users/" + NSUserName())
