@@ -12,6 +12,11 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
+#if canImport(System)
+    import System
+#else
+    import SystemPackage
+#endif
 
 extension Path {
     /// Test whether a path is absolute.
@@ -47,35 +52,45 @@ extension Path {
         return (Path.current + self).normalize()
     }
 
-    /// Normalizes the path, this cleans up redundant ".." and ".", double slashes
-    /// and resolves "~".
+    /// Normalizes the path, this cleans up redundant ".." and ".", and double slashes.
     ///
     /// - Returns: a new path made by removing extraneous path components from the underlying String
     ///   representation.
     ///
     public func normalize() -> Path {
-        Path(NSString(string: path).standardizingPath)
+        Path(filePath: filePath.lexicallyNormalized(), fileSystemInfo: fileSystemInfo)
     }
 
-    /// De-normalizes the path, by replacing the current user home directory with "~".
+    /// Replaces the prefix of the path with `~` or `./` if the prefix matches the current user's
+    /// home directory or current path.
     ///
     /// - Returns: a new path made by removing extraneous path components from the underlying String
     ///   representation.
     ///
     public func abbreviate() -> Path {
+        if let relativeToHome = relative(against: .home) {
+            return Path("~" + relativeToHome.string)
+        } else if let relativeToCurrent = relative(against: .current) {
+            return Path("./") + relativeToCurrent
+        } else {
+            return self
+        }
+    }
+
+    /// Removes the prefix of the path if the prefix matches the given leading path
+    ///
+    /// - Parameter leadingPath The prefix to remove if present
+    /// - Returns: a new path made by removing the prefix if present. `nil` if not.
+    ///
+    public func relative(against leadingPath: Path) -> Path? {
         let rangeOptions: String.CompareOptions = fileSystemInfo.isFSCaseSensitiveAt(path: self) ?
             [.anchored] : [.anchored, .caseInsensitive]
-        let home = Path.home.string
-        guard let homeRange = path.range(of: home, options: rangeOptions) else { return self }
-        let withoutHome = Path(path.replacingCharacters(in: homeRange, with: ""))
-
-        if withoutHome.path.isEmpty || withoutHome.path == Path.separator {
-            return Path("~")
-        } else if withoutHome.isAbsolute {
-            return Path("~" + withoutHome.path)
-        } else {
-            return Path("~") + withoutHome.path
+        guard let leadingRange = string.range(of: leadingPath.string, options: rangeOptions),
+              leadingRange.lowerBound == string.startIndex
+        else {
+            return nil
         }
+        return Path(filePath: FilePath(string.replacingCharacters(in: leadingRange, with: "")))
     }
 
     /// Returns the path of the item pointed to by a symbolic link.

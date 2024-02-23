@@ -68,7 +68,7 @@ public struct Path: Sendable {
     public init<S: Collection>(components: S) where S.Iterator.Element == String {
         let path: String
         if components.isEmpty {
-            path = "."
+            path = ""
         } else if components.first == Path.separator, components.count > 1 {
             let _path = components.joined(separator: Path.separator)
             path = String(_path[_path.index(after: _path.startIndex)...])
@@ -153,5 +153,6 @@ extension Path {
     public static func ~= (lhs: Path, rhs: Path) -> Bool {
         lhs == rhs
             || lhs.normalize() == rhs.normalize()
+            || lhs.absolute() == rhs.absolute()
     }
 }

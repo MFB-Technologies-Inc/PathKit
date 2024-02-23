@@ -12,6 +12,11 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
+#if canImport(System)
+    import System
+#else
+    import SystemPackage
+#endif
 
 extension Path {
     /// Appends a Path fragment to another Path to produce a new Path
@@ -26,43 +31,16 @@ extension Path {
 }
 
 /// Appends a String fragment to another String to produce a new Path
-func + (lhs: String, rhs: String) -> Path {
-    if rhs.hasPrefix(Path.separator) {
+private func + (lhs: String, rhs: String) -> Path {
+    let rhs = Path(rhs)
+    if rhs.isAbsolute {
         // Absolute paths replace relative paths
-        return Path(rhs)
+        return rhs
     } else {
-        var lSlice = ArraySlice(NSString(string: lhs).pathComponents)
-        var rSlice = ArraySlice(NSString(string: rhs).pathComponents)
-
-        // Get rid of trailing "/" at the left side
-        if lSlice.count > 1, lSlice.last == Path.separator {
-            lSlice.removeLast()
+        var lhs = FilePath(lhs)
+        for rhsComponent in rhs.components {
+            lhs.append(rhsComponent)
         }
-
-        // Advance after the first relevant "."
-        lSlice = lSlice.filter { $0 != "." }
-        rSlice = rSlice.filter { $0 != "." }
-
-        // Eats up trailing components of the left and leading ".." of the right side
-        while lSlice.last != "..", !lSlice.isEmpty, rSlice.first == ".." {
-            if lSlice.count > 1 || lSlice.first != Path.separator {
-                // A leading "/" is never popped
-                lSlice.removeLast()
-            }
-            if !rSlice.isEmpty {
-                rSlice.removeFirst()
-            }
-
-            switch (lSlice.isEmpty, rSlice.isEmpty) {
-            case (true, _):
-                break
-            case (_, true):
-                break
-            default:
-                continue
-            }
-        }
-
-        return Path(components: lSlice + rSlice)
+        return Path(filePath: lhs).normalize()
     }
 }
