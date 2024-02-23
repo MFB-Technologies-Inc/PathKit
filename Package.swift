@@ -1,9 +1,9 @@
-// swift-tools-version:5.8
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
     name: "PathKit",
-    platforms: [.iOS(.v12), .macOS(.v10_13), .watchOS(.v4), .tvOS(.v12), .macCatalyst(.v13)],
+    platforms: [.iOS(.v15), .macOS(.v12), .watchOS(.v8), .tvOS(.v15), .macCatalyst(.v15), .visionOS(.v1)],
     products: [
         .library(name: "PathKit", targets: ["PathKit"]),
     ],
