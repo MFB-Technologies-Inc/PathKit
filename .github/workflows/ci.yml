@@ -52,7 +52,9 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
-      - name: Install Swift
-        run: winget install --id Swift.Toolchain -e
+      - uses: compnerd/gha-setup-swift@v0.2.1
+        with:
+          branch: swift-5.9.2-release
+          tag: 5.9.2-RELEASE
       - name: Run Tests
         run: TEMP_DIR=${{ runner.temp }} swift test
