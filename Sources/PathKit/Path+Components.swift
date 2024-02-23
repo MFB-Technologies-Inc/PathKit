@@ -19,7 +19,7 @@ extension Path {
     /// - Returns: the last path component
     ///
     public var lastComponent: String {
-        NSString(string: path).lastPathComponent
+        filePath.lastComponent?.string ?? ""
     }
 
     /// The last path component without file extension
@@ -29,7 +29,7 @@ extension Path {
     /// - Returns: the last path component without file extension
     ///
     public var lastComponentWithoutExtension: String {
-        NSString(string: lastComponent).deletingPathExtension
+        filePath.stem ?? ""
     }
 
     /// Splits the string representation on the directory separator.
@@ -38,7 +38,11 @@ extension Path {
     /// - Returns: all path components
     ///
     public var components: [String] {
-        NSString(string: path).pathComponents
+        if let root = filePath.root {
+            CollectionOfOne(root.string) + filePath.components.map(\.string)
+        } else {
+            filePath.components.map(\.string)
+        }
     }
 
     /// The file extension behind the last dot of the last component.
@@ -46,11 +50,6 @@ extension Path {
     /// - Returns: the file extension
     ///
     public var `extension`: String? {
-        let pathExtension = NSString(string: path).pathExtension
-        if pathExtension.isEmpty {
-            return nil
-        }
-
-        return pathExtension
+        filePath.extension
     }
 }

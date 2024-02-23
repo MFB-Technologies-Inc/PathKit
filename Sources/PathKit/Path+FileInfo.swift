@@ -59,7 +59,7 @@ extension Path {
     ///
     public var isSymlink: Bool {
         do {
-            try Path.fileManager.destinationOfSymbolicLink(atPath: path)
+            _ = try Path.fileManager.destinationOfSymbolicLink(atPath: path)
             return true
         } catch {
             return false

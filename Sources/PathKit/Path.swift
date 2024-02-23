@@ -12,20 +12,40 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
+#if canImport(System)
+    import System
+#else
+    import SystemPackage
+
+    extension FilePath: @unchecked Sendable {}
+#endif
 
 /// Represents a filesystem path.
 public struct Path: Sendable {
     /// The character used by the OS to separate two path elements
     public static let separator = "/"
 
+    /// The underlying `FilePath` representation
+    public let filePath: FilePath
+
     /// The underlying string representation
-    let path: String
+    var path: String { filePath.string }
 
     static let fileManager = FileManager.default
 
     let fileSystemInfo: any FileSystemInfo
 
     // MARK: Init
+
+    init(filePath: FilePath, fileSystemInfo: any FileSystemInfo) {
+        self.filePath = filePath
+        self.fileSystemInfo = fileSystemInfo
+    }
+
+    /// Create a Path from a `System.FilePath`
+    public init(filePath: FilePath) {
+        self.init(filePath: filePath, fileSystemInfo: DefaultFileSystemInfo())
+    }
 
     public init() {
         self.init("")
@@ -37,8 +57,7 @@ public struct Path: Sendable {
     }
 
     init(_ path: String, fileSystemInfo: any FileSystemInfo) {
-        self.path = path
-        self.fileSystemInfo = fileSystemInfo
+        self.init(filePath: FilePath(path), fileSystemInfo: fileSystemInfo)
     }
 
     init(fileSystemInfo: any FileSystemInfo) {
@@ -79,24 +98,27 @@ extension Path: ExpressibleByStringLiteral {
 
 extension Path: CustomStringConvertible {
     public var description: String {
-        path
+        filePath.description
+    }
+}
+
+extension Path: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        filePath.debugDescription
     }
 }
 
 extension Path: Equatable {
     /// Determines if two paths are identical
-    ///
-    /// - Note: The comparison is string-based. Be aware that two different paths (foo.txt and
-    ///   ./foo.txt) can refer to the same file.
-    ///
     public static func == (lhs: Path, rhs: Path) -> Bool {
-        lhs.path == rhs.path
+        lhs.filePath == rhs.filePath
     }
 }
 
 extension Path: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(path.hashValue)
+        hasher.combine(filePath.hashValue)
+        hasher.combine(ObjectIdentifier(Self.self))
     }
 }
 

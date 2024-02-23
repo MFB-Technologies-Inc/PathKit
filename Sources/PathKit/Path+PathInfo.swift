@@ -19,7 +19,7 @@ extension Path {
     /// - Returns: `true` iff the path begins with a slash
     ///
     public var isAbsolute: Bool {
-        path.hasPrefix(Path.separator)
+        filePath.isAbsolute
     }
 
     /// Test whether a path is relative.
@@ -27,7 +27,7 @@ extension Path {
     /// - Returns: `true` iff a path is relative (not absolute)
     ///
     public var isRelative: Bool {
-        !isAbsolute
+        filePath.isRelative
     }
 
     /// Concatenates relative paths to the current directory and derives the normalized path
