@@ -22,6 +22,15 @@ let package = Package(
     ]
 )
 
+#if !canImport(System)
+    package.dependencies += [.package(url: "https://github.com/apple/swift-system.git", from: "1.2.1")]
+    for target in package.targets {
+        if target.name == "PathKit" {
+            target.dependencies += [Target.Dependency.product(name: "SystemPackage", package: "swift-system")]
+        }
+    }
+#endif
+
 extension [SwiftSetting] {
     static let swiftSix: [SwiftSetting] = [
         .enableUpcomingFeature("BareSlashRegexLiterals"),
