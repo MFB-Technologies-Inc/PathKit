@@ -31,8 +31,8 @@ func + (lhs: String, rhs: String) -> Path {
         // Absolute paths replace relative paths
         return Path(rhs)
     } else {
-        var lSlice = NSString(string: lhs).pathComponents.fullSlice
-        var rSlice = NSString(string: rhs).pathComponents.fullSlice
+        var lSlice = ArraySlice(NSString(string: lhs).pathComponents)
+        var rSlice = ArraySlice(NSString(string: rhs).pathComponents)
 
         // Get rid of trailing "/" at the left side
         if lSlice.count > 1, lSlice.last == Path.separator {
@@ -40,8 +40,8 @@ func + (lhs: String, rhs: String) -> Path {
         }
 
         // Advance after the first relevant "."
-        lSlice = lSlice.filter { $0 != "." }.fullSlice
-        rSlice = rSlice.filter { $0 != "." }.fullSlice
+        lSlice = lSlice.filter { $0 != "." }
+        rSlice = rSlice.filter { $0 != "." }
 
         // Eats up trailing components of the left and leading ".." of the right side
         while lSlice.last != "..", !lSlice.isEmpty, rSlice.first == ".." {
